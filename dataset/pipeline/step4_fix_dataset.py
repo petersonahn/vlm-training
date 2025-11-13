@@ -8,7 +8,7 @@ config_postprocess.py의 설정을 기반으로:
 """
 
 import re
-from datasets import load_from_disk, DatasetDict
+from datasets import load_from_disk
 from tqdm import tqdm
 from config_postprocess import MEDICAL_TERMS, LABEL_MAPPING
 
@@ -19,7 +19,9 @@ def translate_text(text):
         return text
     
     translated = text
-    for eng, kor in MEDICAL_TERMS.items():
+    # 긴 단어부터 처리 (복합어 우선 처리)
+    sorted_terms = sorted(MEDICAL_TERMS.items(), key=lambda x: len(x[0]), reverse=True)
+    for eng, kor in sorted_terms:
         # 단어 경계를 고려한 패턴
         pattern = re.compile(r'\b' + re.escape(eng) + r'\b', re.IGNORECASE)
         translated = pattern.sub(kor, translated)
